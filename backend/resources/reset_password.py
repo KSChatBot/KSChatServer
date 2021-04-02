@@ -1,7 +1,7 @@
 from flask import request, render_template
 from flask_jwt_extended import create_access_token, decode_token
 from database.models import User
-from flask_restful import Resource
+from flask_restx import Resource, Namespace, fields
 import datetime
 from resources.errors import SchemaValidationError, InternalServerError, \
     EmailDoesnotExistsError, BadTokenError
@@ -9,6 +9,12 @@ from jwt.exceptions import ExpiredSignatureError, DecodeError, \
     InvalidTokenError
 from services.mail_service import send_email
 
+Password_NS = Namespace(
+    name="Password Management",
+    description="사용자의 비밀번호를 관리 하기 위해 사용하는 API.",
+)
+
+@Password_NS.route('/forgot')
 class ForgotPassword(Resource):
     def post(self):
         url = request.host_url + 'reset/'
@@ -25,7 +31,7 @@ class ForgotPassword(Resource):
             expires = datetime.timedelta(hours=24)
             reset_token = create_access_token(str(user.id), expires_delta=expires)
 
-            return send_email('[Movie-bag] Reset Your Password',
+            return send_email('[KSChat Portal] Reset Your Password',
                               sender='support@movie-bag.com',
                               recipients=[user.email],
                               text_body=render_template('email/reset_password.txt',
@@ -40,6 +46,7 @@ class ForgotPassword(Resource):
             raise InternalServerError
 
 
+@Password_NS.route('/reset')
 class ResetPassword(Resource):
     def post(self):
         url = request.host_url + 'reset/'
@@ -59,7 +66,7 @@ class ResetPassword(Resource):
             user.hash_password()
             user.save()
 
-            return send_email('[Movie-bag] Password reset successful',
+            return send_email('[KSChat Portal] Password reset successful',
                               sender='support@movie-bag.com',
                               recipients=[user.email],
                               text_body='Password reset was successful',

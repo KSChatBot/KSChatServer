@@ -1,9 +1,7 @@
 flask==1.1.1
 flask-mongoengine
-flask-restful
-flask-restplus
-marshmallow
-marshmallow_mongoengine
+flask-restx
+flask_cors
 flask-bcrypt
 flask-jwt-extended
 flask-mail
