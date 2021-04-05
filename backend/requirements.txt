@@ -1,0 +1,10 @@
+flask==1.1.1
+flask-mongoengine
+flask-restx
+flask_cors
+flask-bcrypt
+flask-jwt-extended
+flask-mail
+gunicorn==20.0.4
+Werkzeug==0.16.1
+
