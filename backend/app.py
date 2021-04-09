@@ -10,7 +10,9 @@ from resources.errors import errors
 import os
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r'*': {'origins': '*'}})
+# cors = CORS(app, resources={r"/accounts/*": {"origins": "*"}})
+
 # app.config.from_envvar('ENV_FILE_LOCATION')
 #SMTP email server 설정
 app.config.update(dict(
@@ -22,7 +24,7 @@ app.config.update(dict(
     MAIL_USE_SSL= False,
     MAIL_USERNAME = 'abc@gmail.com',
     MAIL_PASSWORD = '**********',
-    JWT_SECRET_KEY = os.environ['JWT_SECRET_KEY']
+    JWT_SECRET_KEY = 't1NP63m4wnBg6nyHYKfmc2TpCOGI4nss' #os.environ['JWT_SECRET_KEY']
 ))
 
 mail = Mail(app)
@@ -42,12 +44,18 @@ api = Api(
 
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
-#몽고디비 설정
+# #몽고디비 설정
+# app.config['MONGODB_SETTINGS'] = {
+#     'host': os.environ['MONGODB_HOST'],
+#     'username': os.environ['MONGODB_USERNAME'],
+#     'password': os.environ['MONGODB_PASSWORD'],
+#     'db': 'webapp'
+# }
+#개발 환경 몽고디비 설정
 app.config['MONGODB_SETTINGS'] = {
-    'host': os.environ['MONGODB_HOST'],
-    'username': os.environ['MONGODB_USERNAME'],
-    'password': os.environ['MONGODB_PASSWORD'],
-    'db': 'webapp'
+    'db': "mongodb",
+    'host': 'localhost',
+    'port': 27017
 }
 
 initialize_db(app)

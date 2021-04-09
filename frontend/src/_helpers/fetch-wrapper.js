@@ -19,8 +19,9 @@ function get(url) {
 function post(url, body) {
     const requestOptions = {
         method: 'POST',
+        mode: 'no-cors', // no-cors, cors, *same-origin
         headers: { 'Content-Type': 'application/json', ...authHeader(url) },
-        credentials: 'include',
+        // credentials: 'include',
         body: JSON.stringify(body)
     };
     return fetch(url, requestOptions).then(handleResponse);

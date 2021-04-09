@@ -1,5 +1,5 @@
-from flask import Response, request
-from flask_jwt_extended import create_access_token, create_refresh_token
+from flask import Response, request, jsonify
+from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required
 from database.models import User
 from flask_restx import Resource, Namespace, fields
 import datetime
@@ -26,7 +26,7 @@ user_fields = Authentication_NS.model('User', {  # Model 객체 생성
     'role': fields.String(description='a User role', required=True),
     'verificationToken': fields.String(description='a User verificationToken'),
     'verified': fields.DateTime(description='a User verified'),
-    # 'resetToken': fields.String(fields.Nested(resetToken_fields), description='a User resetToken'),
+    'resetToken': fields.Nested(resetToken_fields, description='a User resetToken'),
     'passwordReset': fields.DateTime(description='a User passwordReset'),
     'updated': fields.DateTime(description='a User updated')
 })
@@ -35,7 +35,6 @@ user_fields_with_id = Authentication_NS.inherit('User With ID', user_fields, {
     'id': fields.Integer(description='a User ID')
 })
 
-
 @Authentication_NS.route('/register')
 class SignupApi(Resource):
     @Authentication_NS.expect(user_fields)
@@ -43,6 +42,7 @@ class SignupApi(Resource):
         try:
             body = request.get_json()
             user =  User(**body)
+            print(user)
             user.hash_password()
             user.save()
             id = user.id
@@ -57,19 +57,20 @@ class SignupApi(Resource):
 @Authentication_NS.route('/authenticate')
 class LoginApi(Resource):
     @Authentication_NS.expect(user_fields)
+    # @jwt_required()
     def post(self):
         try:
             body = request.get_json()
             user = User.objects.get(email=body.get('email'))
-            authorized = user.check_password(body.get('password'))
+            authorized = user.check_password(body.get('passwordHash'))
             if not authorized:
                 raise UnauthorizedError
 
             expires = datetime.timedelta(days=7)
             access_token = create_access_token(identity=str(user.id), expires_delta=expires)
-            refresh_token = create_refresh_token(user.id)
+            refresh_token = create_refresh_token(identity=str(user.id))
 
-            return { 'id': user.id,
+            return { 'id': str(user.id),
                      'email': user.email,
                      'title': user.title,
                      'firstName': user.firstName,
@@ -86,7 +87,9 @@ class LoginApi(Resource):
 @Authentication_NS.route('/refresh-token')
 class TokenRefresh(Resource):
     @Authentication_NS.expect(user_fields)
+    @jwt_required()
     def post(self):
+        pass
         # retrive the user's identity from the refresh token using a Flask-JWT-Extended built-in method
         current_user = get_jwt_identity()
         # return a non-fresh token for the user
