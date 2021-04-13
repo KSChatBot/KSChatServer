@@ -1,6 +1,12 @@
-from flask import Response, request
+from flask import Response, request, json, jsonify
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+    jwt_required,
+    get_jwt_identity,
+    get_jwt
+)
 from database.models import API_Content, User
-from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restx import Resource, Namespace, fields
 from mongoengine.errors import FieldDoesNotExist, NotUniqueError, DoesNotExist, ValidationError, InvalidQueryError
 from resources.errors import SchemaValidationError, API_ContentAlreadyExistsError, InternalServerError, \
@@ -20,7 +26,7 @@ api_content_fields = API_Content_NS.model('API_Content', {  # Model 객체 생�
 })
 
 api_content_fields_with_id = API_Content_NS.inherit('API_Content With ID', api_content_fields, {
-    'id': fields.Integer(description='a API_Content ID')
+    'ID': fields.Integer(description='a API_Content ID')
 })
 
 @API_Content_NS.route('')
@@ -29,21 +35,36 @@ class API_ContentsApi(Resource):
     def get(self):
         query = API_Content.objects()
         apicontents = API_Content.objects().to_json()
+        print("API Contents 조회 성공 ...")
         return Response(apicontents, mimetype="application/json", status=200)
 
-    @jwt_required
     @API_Content_NS.expect(api_content_fields)
     @API_Content_NS.response(201, 'Success', api_content_fields_with_id)
+    @jwt_required()
     def post(self):
+        print("API Contents 등록 시작 ...")
         try:
             user_id = get_jwt_identity()
-            body = request.get_json()
+            # body = request.get_json()
+            data_json = request.data
+            data_dict = json.loads(data_json)
+            print("======API Contents 등록 정보=======")
+            print(data_dict)
+            print("======end API Contents 등록 정보=======")
             user = User.objects.get(id=user_id)
-            apicontent =  API_Content(**body, added_by=user)
+            # apicontent =  API_Content(**body, added_by=user)
+            apicontent =  API_Content()
+            apicontent.api_name = data_dict.get('api_name')
+            apicontent.api_desc = data_dict.get('api_name')
+            apicontent.api_key = data_dict.get('api_name')
+            apicontent.api_endpoint = data_dict.get('api_name')
+            apicontent.added_by = user
+            apicontent.ID = API_Content.objects.count() + 1
             apicontent.save()
-            user.update(push__apicontents=apicontent)
+            user.update(push__api_contents=apicontent)
             user.save()
             id = apicontent.id
+            print("API Contents 등록 성공 ...")
             return {'id': str(id)}, 200
         except (FieldDoesNotExist, ValidationError):
             raise SchemaValidationError
@@ -52,12 +73,12 @@ class API_ContentsApi(Resource):
         except Exception as e:
             raise InternalServerError
 
-@API_Content_NS.route('/<id>')
-@API_Content_NS.doc(params={'id': 'An ID'})
+@API_Content_NS.route('/<ID>')
+@API_Content_NS.doc(params={'ID': 'An ID'})
 class API_ContentApi(Resource):
-    @jwt_required
     @API_Content_NS.response(202, 'Success', api_content_fields_with_id)
     @API_Content_NS.response(500, 'Failed')
+    @jwt_required()
     def put(self, id):
         try:
             user_id = get_jwt_identity()
@@ -72,9 +93,9 @@ class API_ContentApi(Resource):
         except Exception:
             raise InternalServerError       
     
-    @jwt_required
     @API_Content_NS.doc(responses={202: 'Success'})
     @API_Content_NS.doc(responses={500: 'Failed'})
+    @jwt_required()
     def delete(self, id):
         try:
             user_id = get_jwt_identity()

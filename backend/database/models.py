@@ -7,7 +7,8 @@ class API_Content(db.Document):
     api_desc = db.StringField()
     api_key = db.StringField()
     api_endpoint = db.StringField()
-    api_data_format = db.StringField()
+    api_data_format = db.DateTimeField(default=datetime.datetime.utcnow)
+    ID = db.IntField(min_value=1)
     added_by = db.ReferenceField('User')
 
 class ResetToken(db.EmbeddedDocument):
