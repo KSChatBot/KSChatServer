@@ -4,16 +4,28 @@ class InternalServerError(Exception):
 class SchemaValidationError(Exception):
     pass
 
-class MovieAlreadyExistsError(Exception):
+class UserAlreadyExistsError(Exception):
     pass
 
-class UpdatingMovieError(Exception):
+class UpdatingUserError(Exception):
     pass
 
-class DeletingMovieError(Exception):
+class DeletingUserError(Exception):
     pass
 
-class MovieNotExistsError(Exception):
+class UserNotExistsError(Exception):
+    pass
+
+class API_ContentAlreadyExistsError(Exception):
+    pass
+
+class UpdatingAPI_ContentError(Exception):
+    pass
+
+class DeletingAPI_ContentError(Exception):
+    pass
+
+class API_ContentNotExistsError(Exception):
     pass
 
 class EmailAlreadyExistsError(Exception):
@@ -37,20 +49,36 @@ errors = {
          "message": "Request is missing required fields",
          "status": 400
      },
-     "MovieAlreadyExistsError": {
-         "message": "Movie with given name already exists",
+     "UserAlreadyExistsError": {
+         "message": "User with given name already exists",
          "status": 400
      },
-     "UpdatingMovieError": {
-         "message": "Updating movie added by other is forbidden",
+     "UpdatingUserError": {
+         "message": "Updating User added by other is forbidden",
          "status": 403
      },
-     "DeletingMovieError": {
-         "message": "Deleting movie added by other is forbidden",
+     "DeletingUserError": {
+         "message": "Deleting User added by other is forbidden",
          "status": 403
      },
-     "MovieNotExistsError": {
-         "message": "Movie with given id doesn't exists",
+     "UserNotExistsError": {
+         "message": "User with given id doesn't exists",
+         "status": 400
+     },
+     "API_ContentAlreadyExistsError": {
+         "message": "API_Content with given name already exists",
+         "status": 400
+     },
+     "UpdatingAPI_ContentError": {
+         "message": "Updating API_Content added by other is forbidden",
+         "status": 403
+     },
+     "DeletingAPI_ContentError": {
+         "message": "Deleting API_Content added by other is forbidden",
+         "status": 403
+     },
+     "API_ContentNotExistsError": {
+         "message": "API_Content with given id doesn't exists",
          "status": 400
      },
      "EmailAlreadyExistsError": {

@@ -3,8 +3,8 @@ from database.models import API_Content, User
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restx import Resource, Namespace, fields
 from mongoengine.errors import FieldDoesNotExist, NotUniqueError, DoesNotExist, ValidationError, InvalidQueryError
-from resources.errors import SchemaValidationError, MovieAlreadyExistsError, InternalServerError, \
-UpdatingMovieError, DeletingMovieError, MovieNotExistsError
+from resources.errors import SchemaValidationError, API_ContentAlreadyExistsError, InternalServerError, \
+UpdatingAPI_ContentError, DeletingAPI_ContentError, API_ContentNotExistsError
 
 API_Content_NS = Namespace(
     name="API_Content",
@@ -48,11 +48,11 @@ class API_ContentsApi(Resource):
         except (FieldDoesNotExist, ValidationError):
             raise SchemaValidationError
         except NotUniqueError:
-            raise MovieAlreadyExistsError
+            raise API_ContentAlreadyExistsError
         except Exception as e:
             raise InternalServerError
 
-@API_Content_NS.route('/<int:id>')
+@API_Content_NS.route('/<id>')
 @API_Content_NS.doc(params={'id': 'An ID'})
 class API_ContentApi(Resource):
     @jwt_required
@@ -68,7 +68,7 @@ class API_ContentApi(Resource):
         except InvalidQueryError:
             raise SchemaValidationError
         except DoesNotExist:
-            raise UpdatingMovieError
+            raise UpdatingAPI_ContentError
         except Exception:
             raise InternalServerError       
     
@@ -82,7 +82,7 @@ class API_ContentApi(Resource):
             apicontent.delete()
             return '', 200
         except DoesNotExist:
-            raise DeletingMovieError
+            raise DeletingAPI_ContentError
         except Exception:
             raise InternalServerError
 
@@ -93,6 +93,6 @@ class API_ContentApi(Resource):
             apicontents = API_Content.objects.get(id=id).to_json()
             return Response(apicontents, mimetype="application/json", status=200)
         except DoesNotExist:
-            raise MovieNotExistsError
+            raise API_ContentNotExistsError
         except Exception:
             raise InternalServerError

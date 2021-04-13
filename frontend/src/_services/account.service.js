@@ -25,13 +25,20 @@ export const accountService = {
 };
 
 function login(email, password) {
-    return fetchWrapper.post(`${baseUrl}/authenticate`, { email, password })
+    //2021.04.12 Flask 에서 body = request.get_json()로 받기위해 추가
+    var myParams = {
+        email: email,
+        password: password
+        }
+
+    return fetchWrapper.post(`${baseUrl}/authenticate`, myParams)
         .then(user => {
             // publish user to subscribers and start timer to refresh token
             userSubject.next(user);
             startRefreshTokenTimer();
             return user;
         });
+    console.log('login 성공....')
 }
 
 function logout() {
@@ -54,6 +61,8 @@ function refreshToken() {
 
 function register(params) {
     return fetchWrapper.post(`${baseUrl}/register`, params);
+    console.log('register 성공....')
+
 }
 
 function verifyEmail(token) {
@@ -81,14 +90,15 @@ function getById(id) {
 }
 
 function create(params) {
-    return fetchWrapper.post(baseUrl, params);
+    return fetchWrapper.post(`${baseUrl}/register`, params);
+    console.log('사용자 등록 성공....')
 }
 
 function update(id, params) {
     return fetchWrapper.put(`${baseUrl}/${id}`, params)
         .then(user => {
             // update stored user if the logged in user updated their own record
-            if (user.id === userSubject.value.id) {
+            if (user.email === userSubject.value.email) {
                 // publish updated user to subscribers
                 user = { ...userSubject.value, ...user };
                 userSubject.next(user);
@@ -102,7 +112,7 @@ function _delete(id) {
     return fetchWrapper.delete(`${baseUrl}/${id}`)
         .then(x => {
             // auto logout if the logged in user deleted their own record
-            if (id === userSubject.value.id) {
+            if (id === userSubject.value.email) {
                 logout();
             }
             return x;

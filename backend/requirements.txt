@@ -3,7 +3,7 @@ flask-mongoengine
 flask-restx
 flask_cors
 flask-bcrypt
-flask-jwt-extended
+Flask-JWT-Extended
 flask-mail
 gunicorn==20.0.4
 Werkzeug==0.16.1

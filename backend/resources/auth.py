@@ -1,11 +1,23 @@
-from flask import Response, request, jsonify
-from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required
-from database.models import User
+from flask import Response, request, json, jsonify
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+    jwt_required,
+    get_jwt_identity,
+    get_jwt
+)
+from database.models import User, RevokedToken
 from flask_restx import Resource, Namespace, fields
-import datetime
-from mongoengine.errors import FieldDoesNotExist, NotUniqueError, DoesNotExist
-from resources.errors import SchemaValidationError, EmailAlreadyExistsError, UnauthorizedError, MovieAlreadyExistsError, \
-InternalServerError
+from datetime import timezone, datetime, timedelta
+from mongoengine.errors import FieldDoesNotExist, NotUniqueError, DoesNotExist, InvalidQueryError
+from resources.errors import SchemaValidationError, EmailAlreadyExistsError, UnauthorizedError, UserAlreadyExistsError, \
+InternalServerError, UpdatingUserError, DeletingUserError, UserNotExistsError
+from database.db import db
+
+# import sys, os
+
+# sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+# from app import jwt
 
 Authentication_NS = Namespace(
     name="Accounts Authentication",
@@ -18,21 +30,20 @@ resetToken_fields = Authentication_NS.model('ResetToken', {
 
 user_fields = Authentication_NS.model('User', {  # Model 객체 생성
     'email': fields.String(description='a User Email', required=True, example="aa@aa.com"),
-    'passwordHash': fields.String(description='a User Password', required=True),
+    'password': fields.String(description='a User Password', required=True),
     'title': fields.String(description='a User Title', required=True),
     'firstName': fields.String(description='a User firstName', required=True),
     'lastName': fields.String(description='a User lastName', required=True),
-    'acceptTerms': fields.Boolean(description='a User acceptTerms'),
-    'role': fields.String(description='a User role', required=True),
-    'verificationToken': fields.String(description='a User verificationToken'),
-    'verified': fields.DateTime(description='a User verified'),
-    'resetToken': fields.Nested(resetToken_fields, description='a User resetToken'),
-    'passwordReset': fields.DateTime(description='a User passwordReset'),
-    'updated': fields.DateTime(description='a User updated')
+    'acceptTerms': fields.Boolean(description='a User acceptTerms')
+})
+
+user_authentication_fields = Authentication_NS.model('User_Authentication', {  # Model 객체 생성
+    'email': fields.String(description='a User Email', required=True, example="aa@aa.com"),
+    'password': fields.String(description='a User Password', required=True)
 })
 
 user_fields_with_id = Authentication_NS.inherit('User With ID', user_fields, {
-    'id': fields.Integer(description='a User ID')
+    'email': fields.String(description='a User Email', example="aa@aa.com")
 })
 
 @Authentication_NS.route('/register')
@@ -40,13 +51,35 @@ class SignupApi(Resource):
     @Authentication_NS.expect(user_fields)
     def post(self):
         try:
-            body = request.get_json()
-            user =  User(**body)
-            print(user)
+            data_json = request.data
+            data_dict = json.loads(data_json)
+            print("======data_dict=======")
+            print(data_dict)
+            print("======end data_dict=======")
+# {'title': 'Mr', 'firstName': 'aa', 'lastName': 'bb', 'email': 'aa@aa.com', 'password': '123456', 'confirmPassword': '123456', 'acceptTerms': True}
+            user = User()
+            user.title = data_dict.get('title')
+            user.firstName = data_dict.get('firstName')
+            user.lastName = data_dict.get('lastName')
+            user.email = data_dict.get('email')
+            user.role = data_dict.get('role')
+            # 필드명 주의
+            user.password = data_dict.get('password')
+            user.acceptTerms = data_dict.get('acceptTerms')
             user.hash_password()
+            firstUser = User.objects().first()
+            if firstUser:
+                if user.role is None:
+                    user.role = 'User'
+            else:
+                user.role = 'Admin'
             user.save()
             id = user.id
+
+            print("사용자 등록 성공....")
+
             return {'id': str(id)}, 200
+
         except FieldDoesNotExist:
             raise SchemaValidationError
         except NotUniqueError:
@@ -56,19 +89,20 @@ class SignupApi(Resource):
 
 @Authentication_NS.route('/authenticate')
 class LoginApi(Resource):
-    @Authentication_NS.expect(user_fields)
-    # @jwt_required()
+    @Authentication_NS.expect(user_authentication_fields)
     def post(self):
         try:
             body = request.get_json()
             user = User.objects.get(email=body.get('email'))
-            authorized = user.check_password(body.get('passwordHash'))
+            authorized = user.check_password(body.get('password'))
             if not authorized:
                 raise UnauthorizedError
 
-            expires = datetime.timedelta(days=7)
+            expires = timedelta(days=7)
             access_token = create_access_token(identity=str(user.id), expires_delta=expires)
             refresh_token = create_refresh_token(identity=str(user.id))
+
+            print("로그인 성공....")
 
             return { 'id': str(user.id),
                      'email': user.email,
@@ -84,66 +118,141 @@ class LoginApi(Resource):
         except Exception as e:
             raise InternalServerError
 
-@Authentication_NS.route('/refresh-token')
-class TokenRefresh(Resource):
-    @Authentication_NS.expect(user_fields)
+@Authentication_NS.route('/revoke-token')
+class UserLogoutAccess(Resource):
+    """
+    User Logout Api 
+    """
+
     @jwt_required()
     def post(self):
-        pass
-        # retrive the user's identity from the refresh token using a Flask-JWT-Extended built-in method
+
+        jti = get_jwt()['jti']
+        try:
+            # Revoking access token
+            revoked_token = RevokedToken(jti=jti)
+            revoked_token.add()
+            print("로그아웃 성공....")
+            return {'message': 'Access token has been revoked'}
+        except:
+            return {'message': 'Something went wrong'}, 500
+
+@Authentication_NS.route('/refresh-token')
+class TokenRefresh(Resource):
+    """
+    Token Refresh Api
+    """
+    @jwt_required(refresh=True)
+    def post(self):
+
+        # Generating new access token
         current_user = get_jwt_identity()
-        # return a non-fresh token for the user
-        new_token = create_access_token(identity=current_user, fresh=False)
+
+        access_token = create_access_token(identity=current_user)
         refresh_token = create_refresh_token(current_user)
-        return {'jwtToken': new_token,
+        print("토큰 리프레쉬....")
+        return {'jwtToken': access_token,
                 'refreshToken': refresh_token}, 200
 
 
 @Authentication_NS.route('')
 class UserListApi(Resource):
+    """
+    모든 사용자 조회 Api
+    """
     @Authentication_NS.doc('list_users')
     def get(self):
         query = User.objects()
         users = User.objects().to_json()
+        print("사용자정보 전부 query 성공....")
+
         return Response(users, mimetype="application/json", status=200)
 
 
-@Authentication_NS.route('/<int:id>')
-@Authentication_NS.doc(params={'id': 'An ID'})
+@Authentication_NS.route('/<string:email>')
 class UserApi(Resource):
+    """
+    사용자 정보 수정 삭제 조회 Api
+    """
+    @Authentication_NS.expect(user_fields)
     @Authentication_NS.response(202, 'Success', user_fields_with_id)
     @Authentication_NS.response(500, 'Failed')
-    def put(self, id):
+    def put(self, email):
+        """
+        사용자 정보 수정 Api
+        """
         try:
-            body = request.get_json()
-            User.objects.get(id=id).update(**body)
-            return '', 200
+            data_json = request.data
+            data_dict = json.loads(data_json)
+            print("======수정할사용자정보=======")
+            print(data_dict)
+            print("======end 수정할사용자정보=======")
+            user = User.objects.get(email=email)
+            user.title = data_dict.get('title')
+            user.firstName = data_dict.get('firstName')
+            user.lastName = data_dict.get('lastName')
+            user.email = data_dict.get('email')
+
+            # 사용자 Role 처리
+            if data_dict.get('role'):
+                user.role = data_dict.get('role')
+            
+            user.acceptTerms = data_dict.get('acceptTerms')
+            # 비밀번호 입력시 처리
+            if data_dict.get('password'):
+                user.password = data_dict.get('password')
+                user.hash_password()
+
+            user.save()
+            id = user.id
+
+            print("사용자정보 수정 성공....")
+
+            return { 'id': str(user.id),
+                     'email': user.email,
+                     'title': user.title,
+                     'firstName': user.firstName,
+                     'lastName': user.lastName,
+                     'role': user.role
+                    }, 200
+
         except InvalidQueryError:
             raise SchemaValidationError
         except DoesNotExist:
-            raise UpdatingMovieError
+            raise UpdatingUserError
         except Exception:
             raise InternalServerError       
     
+    @Authentication_NS.doc(params={'email': 'An Email'})
     @Authentication_NS.doc(responses={202: 'Success'})
     @Authentication_NS.doc(responses={500: 'Failed'})
-    def delete(self, id):
+    def delete(self, email):
+        """
+        사용자 정보 삭제 Api
+        """
         try:
-            user = User.objects.get(id=id)
+            user = User.objects.get(email=email)
             user.delete()
+            print("사용자정보 삭제 성공....")
+
             return '', 200
         except DoesNotExist:
-            raise DeletingMovieError
+            raise DeletingUserError
         except Exception:
             raise InternalServerError
 
+    @Authentication_NS.doc(params={'email': 'An Email'})
     @Authentication_NS.response(200, 'Success', user_fields_with_id)
     @Authentication_NS.response(500, 'Failed')
-    def get(self, id):
+    def get(self, email):
+        """
+        사용자 정보 조회 Api
+        """
         try:
-            user = User.objects.get(id=id).to_json()
+            user = User.objects.get(email=email).to_json()
+            print("사용자정보 조회 성공....")
             return Response(user, mimetype="application/json", status=200)
         except DoesNotExist:
-            raise MovieNotExistsError
+            raise UserNotExistsError
         except Exception:
             raise InternalServerError

@@ -11,13 +11,13 @@ function List({ match }) {
         accountService.getAll().then(x => setUsers(x));
     }, []);
 
-    function deleteUser(id) {
+    function deleteUser(email) {
         setUsers(users.map(x => {
-            if (x.id === id) { x.isDeleting = true; }
+            if (x.email === email) { x.isDeleting = true; }
             return x;
         }));
-        accountService.delete(id).then(() => {
-            setUsers(users => users.filter(x => x.id !== id));
+        accountService.delete(email).then(() => {
+            setUsers(users => users.filter(x => x.email !== email));
         });
     }
 
@@ -37,13 +37,13 @@ function List({ match }) {
                 </thead>
                 <tbody>
                     {users && users.map(user =>
-                        <tr key={user.id}>
+                        <tr key={user.email}>
                             <td>{user.title} {user.firstName} {user.lastName}</td>
                             <td>{user.email}</td>
                             <td>{user.role}</td>
                             <td style={{ whiteSpace: 'nowrap' }}>
-                                <Link to={`${path}/edit/${user.id}`} className="btn btn-sm btn-primary mr-1">Edit</Link>
-                                <button onClick={() => deleteUser(user.id)} className="btn btn-sm btn-danger" style={{ width: '60px' }} disabled={user.isDeleting}>
+                                <Link to={`${path}/edit/${user.email}`} className="btn btn-sm btn-primary mr-1">Edit</Link>
+                                <button onClick={() => deleteUser(user.email)} className="btn btn-sm btn-danger" style={{ width: '60px' }} disabled={user.isDeleting}>
                                     {user.isDeleting 
                                         ? <span className="spinner-border spinner-border-sm"></span>
                                         : <span>Delete</span>
