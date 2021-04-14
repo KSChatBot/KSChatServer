@@ -29,6 +29,9 @@ debug*
 # virtualenv
 env
 
+# MongoDB Data
+data
+
 # cov
 htmlcov
 .coverage
