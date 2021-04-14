@@ -7,8 +7,10 @@ class API_Content(db.Document):
     api_desc = db.StringField()
     api_key = db.StringField()
     api_endpoint = db.StringField()
-    api_data_format = db.DateTimeField(default=datetime.datetime.utcnow)
-    ID = db.IntField(min_value=1)
+    api_data_format = db.StringField()
+    created = db.DateTimeField(default=datetime.datetime.utcnow)
+    updated = db.DateTimeField()
+    seq = db.IntField(min_value=1)
     added_by = db.ReferenceField('User')
 
 class ResetToken(db.EmbeddedDocument):
@@ -63,5 +65,17 @@ class User(db.Document):
 
     def check_password(self, password):
         return check_password_hash(self.password, password)
+
+    # def to_json(self):
+    #     return {
+    #         "_id": str(self.pk),
+    #         "email": self.email,
+    #         "password": self.password,
+    #         "title": self.title,
+    #         "firstName": self.firstName,
+    #         "lastName": self.lastName,
+    #         "acceptTerms": self.acceptTerms,
+    #         "role": self.role
+    #     }
 
 User.register_delete_rule(API_Content, 'added_by', db.CASCADE)

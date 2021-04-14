@@ -30,11 +30,12 @@ resetToken_fields = Authentication_NS.model('ResetToken', {
 
 user_fields = Authentication_NS.model('User', {  # Model 객체 생성
     'email': fields.String(description='a User Email', required=True, example="aa@aa.com"),
-    'password': fields.String(description='a User Password', required=True),
-    'title': fields.String(description='a User Title', required=True),
+    'password': fields.String(description='a User Password', required=True, example="영숫자, 특수문자 조합 6문자 이상으로..."),
+    'title': fields.String(description='a User Title', required=True, example="Mr 또는 Mrs, Miss, Ms"),
     'firstName': fields.String(description='a User firstName', required=True),
     'lastName': fields.String(description='a User lastName', required=True),
-    'acceptTerms': fields.Boolean(description='a User acceptTerms')
+    'role': fields.String(description='a User Role', required=True, example="User 또는 Admin"),
+    'acceptTerms': fields.Boolean(description='a User acceptTerms', example="True 또는 False")
 })
 
 user_authentication_fields = Authentication_NS.model('User_Authentication', {  # Model 객체 생성
@@ -78,7 +79,7 @@ class SignupApi(Resource):
 
             print("사용자 등록 성공....")
 
-            return {'id': str(id)}, 200
+            return {'email': data_dict.get('email')}, 200
 
         except FieldDoesNotExist:
             raise SchemaValidationError
