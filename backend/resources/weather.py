@@ -5,7 +5,7 @@ import pandas as pd
 import datetime
 from flask import Response, request, json, jsonify
 from flask_restx import Resource, Namespace, fields
-from database.db import db
+from database.models import API_Content, User
 
 WeaherInfo_NS = Namespace(
     name="WeaherInfo",
@@ -13,8 +13,7 @@ WeaherInfo_NS = Namespace(
 )
 
 weaherinfo_fields = WeaherInfo_NS.model('WeaherInfo', {  # Model 객체 생성
-    'callback_url': fields.String(description='The Call Back URL', required=True, example="https://search.naver.com/search.naver?"),
-    'service_key': fields.String(description='The API Service Key', example="공공데이타날씨정보"),
+    'api_name': fields.String(description='a API_Content', required=True, example="날씨정보"),
     'sido': fields.String(description='날씨조회를 위한 시도명'),
     'gungu': fields.String(description='날씨조회를 위한 시군구명'),
     'dong': fields.String(description='날씨조회를 위한 동네명', required=True)
@@ -36,15 +35,18 @@ class WeaherInfoNaver(Resource):
             print(data_dict)
             print("======end 네이버 날씨 크롤링정보=======")
 
-            callback_url = data_dict.get('callback_url')
+            api_name = data_dict.get('api_name')
+            apicontent = API_Content.objects.get(api_name=api_name)
             sido = data_dict.get('sido')
             gungu = data_dict.get('gungu')
             dong = data_dict.get('dong')
 
-            # callback_url = 'https://search.naver.com/search.naver?'
+            # api_endpoint = 'https://search.naver.com/search.naver?'
             # payload = "query=" + sido + '+' + gungu + '+' + dong + '+' + "날씨"
             # print("네이버날씨URL:{}".format(callback_url + payload))
-            base_url = callback_url + "query={}+{}+{}+날씨"
+            # api_endpoint
+            # api_key
+            base_url = apicontent.api_endpoint + "query={}+{}+{}+날씨"
             url = base_url.format(sido, gungu, dong)
             print("url:",url)
 
@@ -78,34 +80,7 @@ class WeaherInfoNaver(Resource):
             find_today_low_temp = data3[0].find('span', {'class': 'min'}).text
             find_today_high_temp = data3[0].find('span', {'class': 'max'}).text
             find_today_exp_temp = data3[0].find('span', {'class': 'sensible'}).text
-            # print('오늘온도 부연설명: '+find_currenttemp_desc)
-            # print('오늘최저온도: '+find_today_low_temp)
-            # print('오늘최고온도: '+find_today_high_temp)
-            # print('오늘체감온도: '+find_today_exp_temp)
 
-            # # 출력 결과를 JSON으로 가공 출력
-            # result = {}
-            # # '현재 위치: '+find_address)
-            # result['현재위치'] = find_address
-            # # '현재 온도: '+find_currenttemp+'℃'
-            # result['현재온도'] = find_currenttemp+'℃'
-            # # '날씨설명: '+find_address)
-            # result['날씨설명'] = find_currenttemp_desc
-            # # '최저온도: '+find_address)
-            # result['최저온도'] = find_today_low_temp
-            # # '최고온도: '+find_address)
-            # result['최고온도'] = find_today_high_temp
-            # # '체감온도: '+find_address)
-            # result['체감온도'] = find_today_exp_temp
-            # # '미세먼지: '+find_address)
-            # result['미세먼지'] = find_dust
-            # # '초미세먼지: '+find_address)
-            # result['초미세먼지'] = find_ultra_dust
-            # # '오존지수: '+find_address)
-            # result['오존지수'] = find_ozone
-
-            # # Serializing json
-            # result_json_object = json.dumps(result, ensure_ascii=False)
             print('네이버 날씨 크롤링 종료!')
 
             # return result_json_object, 200
