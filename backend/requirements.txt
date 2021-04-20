@@ -7,4 +7,10 @@ Flask-JWT-Extended
 flask-mail
 gunicorn==20.0.4
 Werkzeug==0.16.1
-
+ipykernel
+requests
+beautifulsoup4
+lxml
+pandas
+xlrd
+selenium
