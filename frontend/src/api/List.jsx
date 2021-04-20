@@ -42,7 +42,7 @@ function List({ match }) {
                         <tr key={api._id['$oid']}>
                             <td>{api.api_name}</td>
                             <td>{api.api_desc}</td>
-                            <td>{api.api_key}<button className="btn btn-sm" onClick={}>Copy</button></td>
+                            <td>{api.api_key} {/* <button className="btn btn-sm" onClick={}>Copy</button> */}</td>
                             <td>{api.api_endpoint}</td>
                             <td>{api.api_data_format}</td>
                             <td style={{ whiteSpace: 'nowrap' }}>
