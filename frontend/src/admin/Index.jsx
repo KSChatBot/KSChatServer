@@ -8,7 +8,7 @@ function Admin({ match }) {
     const { path } = match;
 
     return (
-        <div className="p-4">
+        <div className="pt30">
             <div className="container">
                 <Switch>
                     <Route exact path={path} component={Overview} />

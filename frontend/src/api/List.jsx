@@ -22,7 +22,7 @@ function List({ match }) {
     }
 
     return (
-        <div>
+        <div className="pt20">
             <h1>Api_Contents</h1>
             <p>All api contents</p>
             <Link to={`${path}/add`} className="btn btn-sm btn-success mb-2">Add Api</Link>
@@ -42,7 +42,7 @@ function List({ match }) {
                         <tr key={api._id['$oid']}>
                             <td>{api.api_name}</td>
                             <td>{api.api_desc}</td>
-                            <td>{api.api_key}<button className="btn btn-sm" onClick={}>Copy</button></td>
+                            <td>{api.api_key}{/*<button className="btn btn-sm" onClick={}>Copy</button>*/}</td>
                             <td>{api.api_endpoint}</td>
                             <td>{api.api_data_format}</td>
                             <td style={{ whiteSpace: 'nowrap' }}>

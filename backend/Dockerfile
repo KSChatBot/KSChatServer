@@ -2,7 +2,7 @@
 FROM python:3.7
 
 # Expose ports
-EXPOSE 5000
+EXPOSE 8081
 
 # Tell Python to not generate .pyc
 ENV PYTHONDONTWRITEBYTECODE 1
