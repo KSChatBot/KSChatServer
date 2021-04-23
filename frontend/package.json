@@ -3,12 +3,12 @@
     "version": "1.0.0",
     "repository": {
         "type": "git",
-        "url": "https://github.com/cornflourblue/react-signup-verification-boilerplate.git"
+        "url": "https://github.com/KSChatBot/KSChatServer.git"
     },
     "license": "MIT",
     "scripts": {
-        "build": "webpack --mode production",
-        "start": "webpack-dev-server --open"
+        "build": "NODE_ENV=production webpack --progress",
+        "start": "webpack-dev-server --progress --open --hot"
     },
     "dependencies": {
         "formik": "^2.1.4",

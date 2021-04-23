@@ -1,8 +1,16 @@
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
+const mode = process.env.NODE_ENV || "development" // 기본값을 development로 설정
+
+console.log("환경:",process.env.NODE_ENV)
 
 module.exports = {
-    mode: 'development',
+    mode,
+    entry: './src/index.jsx',                            // 리액트 파일이 시작하는 곳
+    output: {                                           // bundled compiled 파일
+        path: path.join(__dirname, '/build'),            //__dirname : 현재 디렉토리, dist 폴더에 모든 컴파일된 하나의 번들파일을 넣을 예정
+        filename: 'index_bundle.js'
+    },
     module: {
         rules: [
             {
