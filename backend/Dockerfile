@@ -16,7 +16,7 @@ RUN unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/
 ENV DISPLAY=:99
 
 # Expose ports
-EXPOSE 5000
+EXPOSE 8081
 
 # Tell Python to not generate .pyc
 ENV PYTHONDONTWRITEBYTECODE 1
