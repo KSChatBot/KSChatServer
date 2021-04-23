@@ -27,16 +27,18 @@ module.exports = {
         }
     },
     plugins: [new HtmlWebpackPlugin({
-        template: './src/index.html'
+        template: './public/index.html'
     })],
     devServer: {
-        // historyApiFallback: true,
-        host: '0.0.0.0'
+        disableHostCheck: true,
+        historyApiFallback: true,
+        host: '0.0.0.0',
+        contentBase: path.join(__dirname, 'public')
     },
     externals: {
         // global app config object
         config: JSON.stringify({
-            apiUrl: 'http://localhost:5000'
+            apiUrl: 'http://koreascoring.iptime.org:8081'
         })
     }
 }
