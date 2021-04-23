@@ -38,7 +38,8 @@ module.exports = {
     externals: {
         // global app config object
         config: JSON.stringify({
-            apiUrl: 'http://koreascoring.iptime.org:8081'
+            // apiUrl: 'http://koreascoring.iptime.org:8081'
+            apiUrl: 'http://localhost:8081'
         })
     }
 }
