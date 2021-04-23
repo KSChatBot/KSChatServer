@@ -89,21 +89,26 @@ function AddEdit({ history, match }) {
                         <div className="form-row">
                             <div className="form-group col">
                                 <label>api 설명</label>
-                                <Field name="api_desc" type="text" className={'form-control' + (errors.api_desc && touched.api_desc ? ' is-invalid' : '')} />
+                                {/*<Field name="api_desc" type="text" className={'form-control' + (errors.api_desc && touched.api_desc ? ' is-invalid' : '')} />*/}
+                                <Field component ='textarea' name="api_desc" className={'form-control' + (errors.api_desc && touched.api_desc ? ' is-invalid' : '')} />
                                 <ErrorMessage name="api_desc" component="div" className="invalid-feedback" />
                             </div>
                         </div>
                         <div className="form-row">
-                            <div className="form-group col-5">
+                            <div className="form-group col">
                                 <label>api key</label>
                                 <Field name="api_key" type="text" className={'form-control' + (errors.api_key && touched.api_key ? ' is-invalid' : '')} />
                                 <ErrorMessage name="api_key" component="div" className="invalid-feedback" />
                             </div>
-                            <div className="form-group col-5">
+                        </div>
+                        <div className="form-row">
+                            <div className="form-group col">
                                 <label>api endpoint</label>
                                 <Field name="api_endpoint" type="text" className={'form-control' + (errors.api_endpoint && touched.api_endpoint ? ' is-invalid' : '')} />
                                 <ErrorMessage name="api_endpoint" component="div" className="invalid-feedback" />
                             </div>
+                        </div>
+                        <div className="form-row">
                             <div className="form-group col">
                                 <label>api data format</label>
                                 <Field name="api_data_format" type="text" className={'form-control' + (errors.api_data_format && touched.api_data_format ? ' is-invalid' : '')} />
