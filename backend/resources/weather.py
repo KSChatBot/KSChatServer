@@ -5,7 +5,7 @@ import pandas as pd
 import datetime
 from flask import Response, request, json, jsonify
 from flask_restx import Resource, Namespace, fields
-from database.models import API_Content, User
+from database.models import Contents, User
 import services.weather_info as wf
 
 WeatherInfo_NS = Namespace(
@@ -14,7 +14,7 @@ WeatherInfo_NS = Namespace(
 )
 
 weaherinfo_fields = WeatherInfo_NS.model('WeatherInfo', {  # Model 객체 생성
-    'api_name': fields.String(description='a API_Content', required=True, example="날씨정보"),
+    'api_name': fields.String(description='a Contents', required=True, example="날씨정보"),
     'sido': fields.String(description='날씨조회를 위한 시도명'),
     'gungu': fields.String(description='날씨조회를 위한 시군구명'),
     'dong': fields.String(description='날씨조회를 위한 동네명', required=True)
@@ -36,7 +36,7 @@ class WeatherInfoNaver(Resource):
             print("======end 네이버 날씨 크롤링정보=======")
 
             api_name = data_dict.get('api_name')
-            apicontent = API_Content.objects.get(api_name=api_name)
+            apicontent = Contents.objects.get(api_name=api_name)
             sido = data_dict.get('sido')
             gungu = data_dict.get('gungu')
             dong = data_dict.get('dong')
@@ -113,7 +113,7 @@ class WeatherInfoPublicData(Resource):
             print("======end 공공데이터 동네예보조회정보=======")
 
             api_name = data_dict.get('api_name')
-            apicontent = API_Content.objects.get(api_name=api_name)
+            apicontent = Contents.objects.get(api_name=api_name)
             sido = data_dict.get('sido')
             gungu = data_dict.get('gungu')
             dong = data_dict.get('dong')

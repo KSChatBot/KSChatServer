@@ -16,16 +16,28 @@ class DeletingUserError(Exception):
 class UserNotExistsError(Exception):
     pass
 
-class API_ContentAlreadyExistsError(Exception):
+class ContentsAlreadyExistsError(Exception):
     pass
 
-class UpdatingAPI_ContentError(Exception):
+class UpdatingContentsError(Exception):
     pass
 
-class DeletingAPI_ContentError(Exception):
+class DeletingContentsError(Exception):
     pass
 
-class API_ContentNotExistsError(Exception):
+class ContentsNotExistsError(Exception):
+    pass
+
+class CategoriesAlreadyExistsError(Exception):
+    pass
+
+class UpdatingCategoriesError(Exception):
+    pass
+
+class DeletingCategoriesError(Exception):
+    pass
+
+class CategoriesNotExistsError(Exception):
     pass
 
 class EmailAlreadyExistsError(Exception):
@@ -65,20 +77,36 @@ errors = {
          "message": "User with given id doesn't exists",
          "status": 400
      },
-     "API_ContentAlreadyExistsError": {
-         "message": "API_Content with given name already exists",
+     "ContentsAlreadyExistsError": {
+         "message": "Contents with given name already exists",
          "status": 400
      },
-     "UpdatingAPI_ContentError": {
-         "message": "Updating API_Content added by other is forbidden",
+     "UpdatingContentsError": {
+         "message": "Updating Contents added by other is forbidden",
          "status": 403
      },
-     "DeletingAPI_ContentError": {
-         "message": "Deleting API_Content added by other is forbidden",
+     "DeletingContentsError": {
+         "message": "Deleting Contents added by other is forbidden",
          "status": 403
      },
-     "API_ContentNotExistsError": {
-         "message": "API_Content with given id doesn't exists",
+     "ContentsNotExistsError": {
+         "message": "Contents with given id doesn't exists",
+         "status": 400
+     },
+     "CategoriesAlreadyExistsError": {
+         "message": "Contents with given name already exists",
+         "status": 400
+     },
+     "UpdatingCategoriesError": {
+         "message": "Updating Contents added by other is forbidden",
+         "status": 403
+     },
+     "DeletingCategoriesError": {
+         "message": "Deleting Contents added by other is forbidden",
+         "status": 403
+     },
+     "CategoriesNotExistsError": {
+         "message": "Contents with given id doesn't exists",
          "status": 400
      },
      "EmailAlreadyExistsError": {
