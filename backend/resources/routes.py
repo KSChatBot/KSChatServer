@@ -2,8 +2,10 @@ from .api_content import Contents_NS
 from .auth import Authentication_NS
 from .reset_password import Password_NS
 from .weather import WeatherInfo_NS
+from .category import Categories_NS
 
 def initialize_routes(api):
+    api.add_namespace(Categories_NS, '/api/categories')
     api.add_namespace(Contents_NS, '/api/contents')
 
     api.add_namespace(Authentication_NS, '/accounts')

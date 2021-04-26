@@ -22,6 +22,9 @@ class Contents(db.Document):
 class Categories(db.Document):
     name = db.StringField(required=True, unique=True)
     desc = db.StringField()
+    created = db.DateTimeField(default=datetime.datetime.utcnow)
+    updated = db.DateTimeField()
+    seq = db.IntField(min_value=1)
     contents = db.ListField(db.ReferenceField('Contents', reverse_delete_rule=db.PULL))
 
 class ResetToken(db.EmbeddedDocument):

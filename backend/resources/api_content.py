@@ -15,7 +15,7 @@ import datetime
 
 Contents_NS = Namespace(
     name="Contents",
-    description="Contents 리스트를 작성하기 위해 사용하는 API.",
+    description="Contents API 정보를 작성하기 위해 사용하는 API.",
 )
 
 api_content_fields = Contents_NS.model('Contents', {  # Model 객체 생성
@@ -28,6 +28,7 @@ api_content_fields = Contents_NS.model('Contents', {  # Model 객체 생성
     'api_ref3': fields.String(description='The Contents user definition api_ref3 field'),
     'api_ref4': fields.String(description='The Contents user definition api_ref4 field'),
     'api_ref5': fields.String(description='The Contents user definition api_ref5 field'),
+    'category_id': fields.String(description='The Categories id(String)', required=True), 
     'api_data_format': fields.String(description='The Contents api_data_format') 
 })
 
@@ -36,7 +37,7 @@ api_content_fields_with_id = Contents_NS.inherit('Contents With ID', api_content
 })
 
 @Contents_NS.route('')
-class ContentsApi(Resource):
+class ContentsBaseApi(Resource):
     @Contents_NS.doc('list_api_contents')
     def get(self):
         query = Contents.objects()
@@ -58,6 +59,8 @@ class ContentsApi(Resource):
             print(data_dict)
             print("======end API Contents 등록 정보=======")
             user = User.objects.get(id=user_id)
+            category_id = data_dict.get('category_id')
+            category = Categories.objects.get(id=category_id)
             # apicontent =  Contents(**body, added_by=user)
             apicontent =  Contents()
             apicontent.api_name = data_dict.get('api_name')
@@ -72,10 +75,13 @@ class ContentsApi(Resource):
             apicontent.api_data_format = data_dict.get('api_data_format')            
             apicontent.updated  = datetime.datetime.utcnow          
             apicontent.added_by = user
+            apicontent.category = category
             apicontent.seq = Contents.objects.count() + 1
             apicontent.save()
             user.update(push__contents=apicontent)
             user.save()
+            category.update(push__contents=apicontent)
+            category.save()
             print("API Contents 등록 성공 ...")
             return { 'id': str(apicontent.id),
                      'api_name': apicontent.api_name,
@@ -88,6 +94,7 @@ class ContentsApi(Resource):
                      'api_ref4': apicontent.api_ref4,
                      'api_ref5': apicontent.api_ref5,
                      'api_data_format': apicontent.api_data_format,
+                     'category_id': str(category.id),
                      'seq': apicontent.seq
                     }, 200
         except (FieldDoesNotExist, ValidationError):
@@ -115,7 +122,15 @@ class ContentsApi(Resource):
             print("======API Contents 수정 정보=======")
             print(data_dict)
             print("======end API Contents 수정 정보=======")
-            apicontent.api_name = data_dict.get('api_name')
+            # apicontent.api_name = data_dict.get('api_name')
+            # Category에서 기존 참조 content 삭제
+            remove_content_from_category = Categories.objects(id=str(apicontent.category.id)).update_one(pull__contents=apicontent)
+            # remove_content_from_category.save()
+
+            # 새로운 Category 참조를 위해 정보 가져옴
+            category_id = data_dict.get('category_id')
+            category = Categories.objects.get(id=category_id)
+
             apicontent.api_desc = data_dict.get('api_desc')
             apicontent.api_key = data_dict.get('api_key')
             apicontent.api_endpoint = data_dict.get('api_endpoint')
@@ -125,8 +140,14 @@ class ContentsApi(Resource):
             apicontent.api_ref4 = data_dict.get('api_ref4')            
             apicontent.api_ref5 = data_dict.get('api_ref5')            
             apicontent.api_data_format = data_dict.get('api_data_format')
+            apicontent.category = category
             apicontent.updated  = datetime.datetime.utcnow          
             apicontent.save()
+
+            # Category에서 새로운 참조 content 등록
+            category.update(push__contents=apicontent)
+            category.save()
+
             print("API Contents 수정 성공 ...")
             return { 'id': str(apicontent.id),
                      'api_name': apicontent.api_name,
@@ -139,6 +160,7 @@ class ContentsApi(Resource):
                      'api_ref4': apicontent.api_ref4,
                      'api_ref5': apicontent.api_ref5,
                      'api_data_format': apicontent.api_data_format,
+                     'category_id': str(category.id),
                      'seq': apicontent.seq
                     }, 200
         except InvalidQueryError:
