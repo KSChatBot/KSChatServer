@@ -9,11 +9,15 @@ function Api({ match }) {
     const { path } = match;
 
     return (
-        <Switch>
-            <Route exact path={path} component={List} />
-            <Route path={`${path}/add`} component={AddEdit} />
-            <Route path={`${path}/edit/:id`} component={AddEdit} />
-        </Switch>
+        <div className="pt20">
+            <div className="container">
+                <Switch>
+                    <Route exact path={path} component={List} />
+                    <Route path={`${path}/add`} component={AddEdit} />
+                    <Route path={`${path}/edit/:id`} component={AddEdit} />
+                </Switch>
+            </div>
+        </div>
     )
 }
 
