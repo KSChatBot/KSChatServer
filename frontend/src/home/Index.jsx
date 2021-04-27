@@ -8,6 +8,8 @@ function Home() {
     const [apis, setApis] = useState(null);
     const [searchInput, setSearchInput] = useState('');
     const [defaultApis, setDefaultApis] = useState(null);
+    const [listStatus, setListStatus] = useState('default');
+    const [searchKeyword, setSearchKeyword] = useState('');
 
     const changeSearchInput = (e) => {
         setSearchInput(e.target.value);
@@ -16,10 +18,22 @@ function Home() {
     const filteringApi = () => {
         if(searchInput) {
             setApis(defaultApis.filter(api => (api.api_name.indexOf(searchInput) != -1 || api.api_desc.indexOf(searchInput) != -1)));
+            setSearchKeyword(searchInput);
+            setListStatus('search');
         } else {
             setApis(defaultApis);
+            setListStatus('default');
         }
+        setSearchInput('');
     }
+
+    const enterInput = (e) => {
+        if(e.key === 'Enter') filteringApi();
+    }
+
+    initWebchat(
+        "https://endpoint-bot.ks-cognigy.com/e5d61dac0499b1583ed3cf6758e1fa1ee4c45a9a12552d97338e24515517bfd6"
+    ).then((webchat) => {window.webchat = webchat;});
     
     useEffect(() => {
         apiService.getAll().then(x => {setApis(x); setDefaultApis(x);});
@@ -47,6 +61,7 @@ function Home() {
                                                                 className="form-control"
                                                                 placeholder="Keyword"
                                                                 onChange={changeSearchInput}
+                                                                onKeyPress={enterInput}
                                                                 value={searchInput} />
                                                             <img src="https://themezhub.net/learnup-demo-2/learnup/assets/img/search.svg" className="search-icon" />
                                                         </div>
@@ -76,8 +91,11 @@ function Home() {
                     <div className="row justify-content-center">
                         <div className="col-lg-5 col-md-6 col-sm-12">
                             <div className="sec-heading center">
-                                <p>Prefix</p>
-                                <h2><span className="theme-cl">주요 </span>API 목록</h2>
+                                <p>API 목록</p>
+                                {listStatus==='search' ?
+                                    <h2><span className="theme-cl">{searchKeyword}</span> 검색 결과 : 총 {apis.length} 개</h2> :
+                                    <h2><span className="theme-cl">주요</span> API</h2>
+                                }
                             </div>
                         </div>
                     </div>
