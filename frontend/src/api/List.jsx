@@ -32,7 +32,7 @@ function List({ match }) {
 
     return (
         <div>
-            <h1>Api_Contents</h1>
+            <h1>컨텐츠 관리</h1>
             <p>All api contents</p>
             <Link to={`${path}/add`} className="btn btn-sm btn-success mb-2">Add Api</Link>
             <table className="table table-striped">
