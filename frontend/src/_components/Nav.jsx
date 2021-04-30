@@ -57,12 +57,10 @@ function Nav() {
                     <div className="nav-menus-wrapper">
                         {user && 
                             <ul className="nav-menu">
-                                <li className=""><NavLink exact to="/" className="">Home</NavLink></li>
-                                <li className=""><NavLink exact to="/profile" className="">Profile</NavLink></li>
                                 {user.role === Role.Admin &&
-                                    <li className=""><NavLink to="/admin" className="nav-item nav-link">Admin</NavLink></li>
+                                    <li className=""><NavLink to="/admin" className="nav-item nav-link">시스템 관리</NavLink></li>
                                 }
-                                <li className=""><NavLink exact to="/api" className="">Api</NavLink></li>
+                                <li className=""><NavLink exact to="/api" className="">컨텐츠 관리</NavLink></li>
                             </ul>
                         }
                         {!user &&
@@ -73,7 +71,8 @@ function Nav() {
                         }
                         {user && 
                             <ul className="nav-menu align-to-right">
-                                <li><a onClick={accountService.logout} className="">Logout</a></li>
+                                <li className=""><NavLink exact to="/profile" className="">사용자 정보</NavLink></li>
+                                <li><a onClick={accountService.logout} className="">로그아웃</a></li>
                             </ul>
                         }
                     </div>
@@ -112,6 +111,7 @@ function AdminNav({ match }) {
         <nav className="admin-nav navbar navbar-expand navbar-light">
             <div className="navbar-nav">
                 <NavLink to={`${path}/users`} className="nav-item nav-link">Users</NavLink>
+                <NavLink to={`${path}/categories`} className="nav-item nav-link">Categories</NavLink>
             </div>
         </nav>
     );
