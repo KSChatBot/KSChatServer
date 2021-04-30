@@ -13,6 +13,7 @@ class Contents(db.Document):
     api_ref3 = db.StringField()
     api_ref4 = db.StringField()
     api_ref5 = db.StringField()
+    api_paths = db.StringField()
     category = db.ReferenceField('Categories')
     created = db.DateTimeField(default=datetime.datetime.utcnow)
     updated = db.DateTimeField()
