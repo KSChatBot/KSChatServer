@@ -1,20 +1,23 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Formik, Field, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 
-import { apiService, alertService } from '@/_services';
+import { apiService, alertService, categoryService } from '@/_services';
 
 function AddEdit({ history, match }) {
     const { id } = match.params;
     const isAddMode = !id;
+    const [categories, setCategories] = useState(null);
+    const [division, setDivision] = useState('일반API');
     
     const initialValues = {
         api_name: '',
         api_desc: '',
         api_key: '',
         api_endpoint: '',
-        api_data_format: ''
+        api_data_format: '',
+        category_id: ''
     };
 
     const validationSchema = Yup.object().shape({
@@ -28,6 +31,8 @@ function AddEdit({ history, match }) {
             .required('api endpoint 가 필요합니다.'),
         api_data_format: Yup.string()
             .required('api data format 이 필요합니다.'),
+        category_id: Yup.string()
+            .required('category 가 필요합니다.')
     });
 
     function onSubmit(fields, { setStatus, setSubmitting }) {
@@ -63,6 +68,10 @@ function AddEdit({ history, match }) {
             });
     }
 
+    function changeDivision(e) {
+        setDivision(e.target.value);
+    }
+
     return (
         <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
             {({ errors, touched, isSubmitting, setFieldValue }) => {
@@ -74,6 +83,7 @@ function AddEdit({ history, match }) {
                             fields.forEach(field => setFieldValue(field, api[field], false));
                         });
                     }
+                    categoryService.getAll().then(x => setCategories(x));
                 }, []);
 
                 return (
@@ -81,6 +91,26 @@ function AddEdit({ history, match }) {
                         <h1>{isAddMode ? 'Api 추가' : 'Api 편집'}</h1>
                         <div className="form-row">
                             <div className="form-group col">
+                                <label>구분</label>
+                                <select onChange={changeDivision}>
+                                    <option value="일반API">일반API</option>
+                                    <option value="UiPath_OnPremise">UiPath_OnPremise</option>
+                                    <option value="UiPath_Cloud">UiPath_Cloud</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="form-row">
+                            <div className="form-group col">
+                                <label>Category</label>
+                                <Field name="category_id" as="select" className={'form-control' + (errors.category_id && touched.category_id ? ' is-invalid' : '')}>
+                                    <option value=""></option>
+                                    {categories && categories.map(category => 
+                                        <option key={category._id['$oid']} value={category._id['$oid']}>{category.name}</option>
+                                    )}
+                                </Field>
+                                <ErrorMessage name="category_id" component="div" className="invalid-feedback" />
+                            </div>
+                            <div className="form-group col-8">
                                 <label>api 이름</label>
                                 <Field name="api_name" type="text" className={'form-control' + (errors.api_name && touched.api_name ? ' is-invalid' : '')} />
                                 <ErrorMessage name="api_name" component="div" className="invalid-feedback" />
@@ -122,6 +152,7 @@ function AddEdit({ history, match }) {
                             </button>
                             <Link to={isAddMode ? '.' : '..'} className="btn btn-link">Cancel</Link>
                         </div>
+                        {division === ''}
                     </Form>
                 );
             }}
