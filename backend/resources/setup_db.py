@@ -143,7 +143,42 @@ class SetupDBApi(Resource):
                 updated=datetime.datetime.utcnow 
                 
             ).save()
+            # Category Cognigy_Chatbot
+            Contents(
+                api_paths="", 
+                api_name="조선내화동영상데모용", 
+                api_desc="조선내화 Cognigy 챗봇 도입을 위한 UiPath 업무자동화 로봇 연계  챗봇 데모로 출장신청, 재경업무 리포트 출력, 기타업무지원으로 구성됨", 
+                api_key="", 
+                api_endpoint="https://endpoint-bot.ks-cognigy.com/7a1ce65085fbf8626677f58034dce31c871128acfdcdee04fe02c8820039a41d", 
+                category=category4, 
+                added_by=user, 
+                updated=datetime.datetime.utcnow 
+                
+            ).save()
 
+            Contents(
+                api_paths="", 
+                api_name="헬프데스크", 
+                api_desc="Cognigy 챗봇 소개를 위한 IT HelpDesk Service를 위한 챗봇으로 노트북등 디바이스 고장접수와 시스템 접속 패스워드 재설정 기능 제공", 
+                api_key="", 
+                api_endpoint="https://endpoint-bot.ks-cognigy.com/50f1f11bc6a0cc0a52b0746e7c262cec63543d8e66e4d93864ef9aff99946529", 
+                category=category4, 
+                added_by=user, 
+                updated=datetime.datetime.utcnow 
+                
+            ).save()
+
+            Contents(
+                api_paths="", 
+                api_name="동네날씨", 
+                api_desc="네이버 날씨를 이용하여 동네 날씨정보를 제공하기 위한 챗봇으로 현재 날씨 기온과 미세먼지 농도를 알려준다.", 
+                api_key="", 
+                api_endpoint="https://endpoint-bot.ks-cognigy.com/2de0420f58eccc3c61f93d2f8abbc63177b80d6c0946c42d16890f569095f4c3", 
+                category=category4, 
+                added_by=user, 
+                updated=datetime.datetime.utcnow 
+                
+            ).save()
             print("Content 등록 성공....")
 
             return {'등록 사용자 email': user.email}, 200
